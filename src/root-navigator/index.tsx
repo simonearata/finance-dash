@@ -11,8 +11,6 @@ import { ChevronRightIcon } from "@chakra-ui/icons";
 import { useBreakpointValue } from "@chakra-ui/media-query";
 
 function FinanceDash() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  /* const variants = useBreakpointValue({base: smVariant, }) */
   return (
     <HStack>
       <Box w="25%" h="100vh" bg="#dfdfdf">

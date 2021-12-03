@@ -1,24 +1,26 @@
 import { Button } from "@chakra-ui/button";
-import { Box, List, ListItem, UnorderedList, VStack } from "@chakra-ui/layout";
+import { Box, VStack } from "@chakra-ui/layout";
 import React from "react";
 import { Link } from "react-router-dom";
 
 function Sidebar() {
+  const buttonMenu: any[] = [
+    { link: "/", name: "Home" },
+    { link: "/mercati", name: "Mercati" },
+    { link: "/notizie", name: "Notizie" },
+    { link: "/portafoglio", name: "Portafoglio" },
+  ];
+
   return (
     <Box mt={5}>
       <VStack>
-        <Link to="/">
-          <Button>Home</Button>
-        </Link>
-        <Link to="/mercati">
-          <Button>Mercati</Button>
-        </Link>
-        <Link to="/notizie">
-          <Button>Notizie</Button>
-        </Link>
-        <Link to="/portafoglio">
-          <Button>Portafoglio</Button>
-        </Link>
+        {buttonMenu.map((button) => {
+          return (
+            <Link to={button?.link}>
+              <Button variant="button-menu">{button.name}</Button>
+            </Link>
+          );
+        })}
       </VStack>
     </Box>
   );

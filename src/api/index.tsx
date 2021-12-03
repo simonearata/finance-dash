@@ -25,6 +25,25 @@ export interface IIndexResponse {
   timestamp: number;
 }
 
+export interface IForex {
+  ticker: string;
+  bid: string;
+  ask: string;
+  open: string;
+  low: string;
+  high: string;
+  changes: string;
+  date: string;
+}
+
+export interface ICommodities {
+  symbol: string;
+  name: string;
+  currency: string;
+  stockExchange: string;
+  exchangeShortName: string;
+}
+
 const fetchApi = (api: string) => {
   const { dev, qlt, prod } = apiConfig?.environments;
   const url = `${prod?.apiUrl}${api}?apikey=${prod?.apiKey}`;
@@ -37,4 +56,12 @@ const fetchApi = (api: string) => {
 
 export const getIndexes = () => {
   return fetchApi("/quote/%5EGSPC,%5EDJI,%5EIXIC");
+};
+
+export const getFx = () => {
+  return fetchApi("fx");
+};
+
+export const getCommodities = () => {
+  return fetchApi("symbol/available-commodities");
 };
