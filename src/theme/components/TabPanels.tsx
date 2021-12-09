@@ -5,7 +5,7 @@ const tabPanels = extendTheme({
     TabPanels: {
       variants: {
         "tabPanels-card": {
-          border: "1px solid",
+          bg: "orange.200",
         },
       },
     },
