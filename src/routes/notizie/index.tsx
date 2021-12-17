@@ -12,8 +12,6 @@ function Notizie() {
     getNews()
       .then((data) => {
         const parseData = data as INews;
-        console.log(parseData);
-
         setNews(parseData);
       })
       .catch((err) => {
@@ -23,8 +21,6 @@ function Notizie() {
   }, []);
 
   news?.data?.map((d) => {
-    console.log(d.title);
-
     return d.title;
   });
 

@@ -5,16 +5,10 @@ import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  getCommodities,
-  getHistoricalComkcusx,
-  getHistoricalComzgusd,
-  ICommodities,
-  IHistoricalCom,
-} from "../api";
+import { fetchApi, getItems, ICommodities, IHistoricalCom } from "../api";
 
 function Commodities() {
-  const [commodities, setCommodities] = useState<ICommodities[]>([]);
+  const [commodities, setCommodities] = useState<ICommodities[]>();
   const [historicalComkcusx, setHistoricalComkcusx] =
     useState<IHistoricalCom>();
   const [historicalComzgusd, setHistoricalComzgusd] =
@@ -24,22 +18,31 @@ function Commodities() {
   const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
-    getCommodities()
+    getItems<ICommodities[]>("symbol/available-commodities")
       .then((data) => {
-        const parsedData = data as ICommodities[];
-        setCommodities(parsedData);
+        setCommodities(data);
       })
       .catch((err) => {
         setError(true);
-        console.log(err);
       });
-    getHistoricalComkcusx().then((data) => {
-      const parsedData = data as IHistoricalCom;
-      setHistoricalComkcusx(parsedData);
-    });
-    getHistoricalComzgusd().then((data) => {
-      const parsedData = data as IHistoricalCom;
-      setHistoricalComzgusd(parsedData);
+
+    [
+      {
+        api: "historical-price-full/KCUSX",
+        setter: setHistoricalComkcusx,
+      },
+      {
+        api: "historical-price-full/GCUSD",
+        setter: setHistoricalComzgusd,
+      },
+    ].forEach((apiCall) => {
+      getItems<IHistoricalCom>(apiCall?.api)
+        .then((data) => {
+          apiCall?.setter(data);
+        })
+        .catch((err) => {
+          setError(true);
+        });
     });
   }, []);
 
@@ -82,9 +85,9 @@ function Commodities() {
 
   const chartComponentRef = useRef<HighchartsReact.RefObject>(null);
 
-  if (error) {
-    return <Box>finite le chiamate</Box>;
-  }
+  /*  if (error) {
+    return <Box>Errore</Box>;
+  } */
 
   return (
     <Box>
@@ -124,7 +127,7 @@ function Commodities() {
           })}
         </Tbody>
       </Table>
-      {selectedChart && (
+      {!error && selectedChart && (
         <HighchartsReact
           highcharts={Highcharts}
           options={selectedChart}

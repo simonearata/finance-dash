@@ -153,9 +153,9 @@ export const getNews = () => {
   return fetchApiNews("all?exchanges=NYSE&filter_entities=true&language=en&");
 };
 
-const fetchApi = (api: string) => {
+const fetchSecondApi = (api: string) => {
   const { dev, qlt, prod } = apiConfig?.environments;
-  const url = `${prod?.apiUrl}${api}?apikey=${prod?.apiKey}`;
+  const url = `${prod?.apiUrl}${api}?apikey=${prod?.apiKey3}`;
   /* return fetch(url).then((res) => res.json()); */
   return new Promise((resolve, reject) => {
     fetch(url).then((res) => {
@@ -170,34 +170,68 @@ const fetchApi = (api: string) => {
   });
 };
 
-export const getIndexes = () => {
-  return fetchApi("/quote/%5EGSPC,%5EDJI,%5EIXIC");
+export const getForex = () => {
+  return fetchSecondApi("fx");
 };
 
-export const getFx = () => {
-  return fetchApi("fx");
-};
+export function fetchApi<T>(api: string): Promise<T> {
+  const { dev, qlt, prod } = apiConfig?.environments;
+  const url = `${prod?.apiUrl}${api}?apikey=${prod?.apiKey3}`;
+  /* return fetch(url).then((res) => res.json()); */
+  return new Promise((resolve, reject) => {
+    fetch(url)
+      .then((res) => {
+        const result = res.json();
 
-export const getCommodities = () => {
-  return fetchApi("symbol/available-commodities");
-};
+        if (res.status === 403) {
+          reject(result);
+        }
 
-export const getHistoricalFXeurusd = () => {
-  return fetchApi("historical-price-full/EURUSD");
-};
+        resolve(result);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+}
 
-export const getHistoricalFXusdjpy = () => {
-  return fetchApi("historical-price-full/USDJPY");
-};
+/* getItems<T>(api: string) è l'input
+Promise<T> è l'output */
 
-export const getHistoricalFXgbpusd = () => {
-  return fetchApi("historical-price-full/GBPUSD");
-};
+interface IStoreData {
+  time: number;
+  data: any;
+}
 
-export const getHistoricalComkcusx = () => {
-  return fetchApi("historical-price-full/KCUSX");
-};
+export function getItems<T>(api: string): Promise<T> {
+  const diff: number = 25 * 60 * 1000;
+  const currentTime = new Date().getTime(); // restituisci la data in millesimi
+  const storedData: string | null = localStorage.getItem(api); // salvo in una variabile gli elementi dello storage
+  const parsedStoreData: IStoreData | null = storedData // se esistono degli elementi nello storage me li retituisci sennò null
+    ? JSON.parse(storedData)
+    : null;
+  const storedTime: number = parsedStoreData?.time || 0; // salvo in una variabile il tempo dello storage
 
-export const getHistoricalComzgusd = () => {
-  return fetchApi("historical-price-full/GCUSD");
-};
+  if (storedTime + diff < currentTime) {
+    // quando sono passati 25 minuti
+    return new Promise<T>((resolve, reject) => {
+      fetchApi<T>(api) // ritorni una fetch che ritorna i dati della chiamata
+        .then((data) => {
+          // se la chiamata va a buon fine
+          const savedData: IStoreData = { time: currentTime, data }; //  creiamo una variabile che contiene un oggetto time e data
+          localStorage.setItem(api, JSON.stringify(savedData)); // settiamo il local storage salvando l'oggetto
+          resolve(data); // ritorna  i nuovi dati
+        })
+        .catch((err) => {
+          resolve(parsedStoreData?.data); // se va in errore ritorna i  dati salvati nello storage
+        });
+    });
+  }
+
+  const parsedData: T = parsedStoreData?.data;
+  if (parsedData) {
+    return Promise.resolve(parsedData);
+  }
+
+  return Promise.reject();
+}

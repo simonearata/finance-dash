@@ -4,46 +4,38 @@ import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  getFx,
-  getHistoricalFXeurusd,
-  getHistoricalFXgbpusd,
-  getHistoricalFXusdjpy,
-  IForex,
-  IHistoricalFx,
-} from "../api";
+import { fetchApi, getItems, IForex, IHistoricalFx } from "../api";
 
 function Forex() {
-  const [forex, setForex] = useState<IForex[]>([]);
   const [historicalFxeurusd, setHistoricalFxeurusd] = useState<IHistoricalFx>();
   const [historicalFxusdjpy, setHistoricalFxusdjpy] = useState<IHistoricalFx>();
   const [historicalFxgbpusd, setHistoricalFxgbpusd] = useState<IHistoricalFx>();
   const [selectedCurrency, setSelectedCurrency] = useState<string>("EUR/USD");
+
+  const [forex, setForex] = useState<IForex[]>();
   const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
-    getFx()
+    getItems<IForex[]>("fx")
       .then((data) => {
-        const parsedData = data as IForex[];
-        console.log(parsedData);
-
-        setForex(parsedData);
+        setForex(data);
       })
       .catch((err) => {
         setError(true);
-        console.log(err);
       });
-    getHistoricalFXeurusd().then((data) => {
-      const parsedData = data as IHistoricalFx;
-      setHistoricalFxeurusd(parsedData);
-    });
-    getHistoricalFXusdjpy().then((data) => {
-      const parsedData = data as IHistoricalFx;
-      setHistoricalFxusdjpy(parsedData);
-    });
-    getHistoricalFXgbpusd().then((data) => {
-      const parsedData = data as IHistoricalFx;
-      setHistoricalFxgbpusd(parsedData);
+
+    [
+      { api: "historical-price-full/EURUSD", setter: setHistoricalFxeurusd },
+      { api: "historical-price-full/USDJPY", setter: setHistoricalFxusdjpy },
+      { api: "historical-price-full/GBPUSD", setter: setHistoricalFxgbpusd },
+    ].forEach((apiCall) => {
+      fetchApi<IHistoricalFx>(apiCall?.api)
+        .then((data) => {
+          apiCall?.setter(data);
+        })
+        .catch((err) => {
+          setError(true);
+        });
     });
   }, []);
 
@@ -92,10 +84,6 @@ function Forex() {
 
   const chartComponentRef = useRef<HighchartsReact.RefObject>(null);
 
-  if (error) {
-    return <Box>finite le chiamate</Box>;
-  }
-
   return (
     <Box>
       <Table variant="table-card">
@@ -125,11 +113,13 @@ function Forex() {
           })}
         </Tbody>
       </Table>
-      <HighchartsReact
-        highcharts={Highcharts}
-        options={selectedChart}
-        ref={chartComponentRef}
-      />
+      {!error && (
+        <HighchartsReact
+          highcharts={Highcharts}
+          options={selectedChart}
+          ref={chartComponentRef}
+        />
+      )}
     </Box>
   );
 }

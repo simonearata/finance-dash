@@ -8,9 +8,9 @@ function FinanceCard() {
   const menuCard: string[] = ["Indici", "Valute", "Commodities"];
 
   return (
-    <Box>
+    <Box w="90%" border="1px" borderRadius="20" boxShadow="2xl">
       <Tabs size="sm" variant="unstyled" mt="50px">
-        <TabList>
+        <TabList ml="20px">
           {menuCard.map((menu, index) => {
             return (
               <Tab bg="#FFFAF0" borderRadius="20px" mr="20px">

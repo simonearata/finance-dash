@@ -6,8 +6,6 @@ import Notizie from "../routes/notizie";
 import Portafoglio from "../routes/portafoglio";
 import Sidebar from "../components/sidebar";
 import FinanceCard from "../components/finance-card";
-import { IconButton } from "@chakra-ui/button";
-import { ChevronRightIcon } from "@chakra-ui/icons";
 import { useBreakpointValue } from "@chakra-ui/media-query";
 import Header from "../components/header";
 

@@ -2,27 +2,25 @@ import { Button } from "@chakra-ui/button";
 import { Image } from "@chakra-ui/image";
 import { Box } from "@chakra-ui/layout";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
-import React, { useEffect, useRef, useState } from "react";
-import { getIndexes, IIndexResponse } from "../api";
+import React, { useEffect, useState } from "react";
+import { getItems, IIndexResponse } from "../api";
 
 function Indexes() {
   const [indexes, setIndexes] = useState<IIndexResponse[]>([]);
   const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
-    getIndexes()
+    getItems<IIndexResponse[]>("/quote/%5EGSPC,%5EDJI,%5EIXIC")
       .then((data) => {
-        const parsedData = data as IIndexResponse[];
-        setIndexes(parsedData);
+        setIndexes(data);
       })
       .catch((err) => {
         setError(true);
-        console.log(err);
       });
   }, []);
 
   if (error) {
-    return <Box>finite le chiamate</Box>;
+    return <Box>Errore</Box>;
   }
 
   return (
